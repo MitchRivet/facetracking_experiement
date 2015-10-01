@@ -1,3 +1,6 @@
+working on eliminate_background.html
+
+
 # tracking.js
 
 [![Build Status](http://img.shields.io/travis/eduardolundgren/tracking.js.svg?style=flat)](https://travis-ci.org/eduardolundgren/tracking.js)
