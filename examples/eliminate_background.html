@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>tracking.js - face with camera</title>
+  <link rel="stylesheet" href="assets/demo.css">
+
+  <script src="../build/tracking-min.js"></script>
+  <script src="../build/data/face-min.js"></script>
+  <script src="../dat.gui/build/dat.gui.min.js"></script>
+  <script src="assets/stats.min.js"></script>
+
+  <style>
+  #testCanvas {
+    background-color: green;
+  }
+  video, canvas {
+    margin-left: 230px;
+    margin-top: 120px;
+    position: absolute;
+  }
+  video {
+    opacity: 0;
+  }
+  </style>
+</head>
+<body>
+  <div class="demo-title">
+    <p><a href="http://trackingjs.com" target="_parent">tracking.js</a> － get user's webcam and detect faces</p>
+  </div>
+
+  <div class="demo-frame">
+    <div class="demo-container">
+      <video id="video" width="320" height="240" preload autoplay loop muted></video>
+      <canvas ng-hide id="canvas" width="320" height="240"></canvas>
+    </div>
+  </div>
+
+
+  <!-- <canvas id="testCanvas" width="320" height="240"></canvas> -->
+
+  <script>
+
+
+    //onload, retrieve video, canvas, and context from the page
+    window.onload = function() {
+
+      var BLEND_TYPES = ["source-over", "source-in", "source-out", "source-atop", "destination-over", "destination-in","destination-out", "destination-atop", "lighter", "darker", "copy", "xor", "difference","multiply","screen","overlay","darken","lighten","color-dodge","color-burn","hard-light",
+      "soft-light","exclusion","hue","saturation","color","luminosity"];
+      var BLEND_MODE = "source-over";
+
+
+      var video = document.getElementById('video');
+      var canvas = document.getElementById('canvas');
+      var context = canvas.getContext('2d');
+      // var context2 = testCanvas.getContext('2d');
+
+      //instantiate the constructor which passes the target we want to detect
+      var tracker = new tracking.ObjectTracker('face');
+      tracker.setInitialScale(4);
+      tracker.setStepSize(2);
+      tracker.setEdgesDensity(0.1);
+
+      //read the canvas pixels with our tracker, let the camera run
+      tracking.track('#video', tracker, { camera: true });
+
+      //listen for track events
+      tracker.on('track', function(event) {
+
+        //clears the tracking rectangle after each event
+        //i.e. we don't save rectangles
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        // context2.clearRect(0, 0, testCanvas.width, testCanvas.height);
+        //foreach rectnagle event (times that the rect finds a face)
+        event.data.forEach(function(rect) {
+          // context.clearRect(0, 0, canvas.width, canvas.height);
+
+          //we want to draw this rectangle path then clip it
+          //this is not working tho- it draws one rectangle at the beginning
+
+
+          context.rect(rect.x, rect.y, rect.width, rect.height);
+
+          context.clip();
+
+          //we're passing in video and giving the coordinates of where we want to draw on the canvas
+          // var face_vid = rect(rect.x, rect.y, rect.width, rect.height);
+
+          // re draw original video over clip thing
+          context.drawImage(video, rect.x, rect.y, 320, 240);
+
+
+          //working face detection, draws rectangles
+          // change composite mode
+          // context.globalCompositeOperation = 'difference';
+          //
+          // context.strokeStyle = '#a64ceb';
+          // context.fillRect(rect.x, rect.y, rect.width, rect.height);
+          // context.font = '11px Helvetica';
+          // context.fillStyle = "#fff";
+          // context.fillText('x: ' + rect.x + 'px', rect.x + rect.width + 5, rect.y + 11);
+          // context.fillText('y: ' + rect.y + 'px', rect.x + rect.width + 5, rect.y + 22);
+          console.log(rect);
+        });
+        // context.restore();
+
+      });
+
+      var gui = new dat.GUI();
+      gui.add(tracker, 'edgesDensity', 0.1, 0.5).step(0.01);
+      gui.add(tracker, 'initialScale', 1.0, 10.0).step(0.1);
+      gui.add(tracker, 'stepSize', 1, 5).step(0.1);
+      // gui.add(tracker, 'BLEND_MODE', BLEND_TYPES);
+
+    };
+  </script>
+
+</body>
+</html>
